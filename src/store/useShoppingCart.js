@@ -1,24 +1,41 @@
-import { create } from 'zustand';
+import { useState } from 'react';
 
-const useShoppingCart = create((set) => ({
-  cartItems: [],
-  addToCart: (item) => set((state) => ({
-    cartItems: [...state.cartItems, item]
-  })),
-  removeFromCart: (id) => set((state) => ({
-    cartItems: state.cartItems.filter(item => item.id !== id)
-  })),
-  clearCart: () => set({ cartItems: [] }),
-  increaseQuantity: (id) => set((state) => ({
-    cartItems: state.cartItems.map(item => 
-      item.id === id ? { ...item, quantity: item.quantity + 1 } : item
-    )
-  })),
-  decreaseQuantity: (id) => set((state) => ({
-    cartItems: state.cartItems.map(item => 
-      item.id === id && item.quantity > 1 ? { ...item, quantity: item.quantity - 1 } : item
-    )
-  }))
-}))
+function useShoppingCart() {
+  const [cartItems, setCartItems] = useState([]);
 
-export default useShoppingCart
+  const addToCart = (item) => {
+    setCartItems((prevItems) => [...prevItems, item]);
+  };
+
+  const removeFromCart = (id) => {
+    setCartItems((prevItems) => prevItems.filter(item => item.id !== id));
+  };
+
+  const clearCart = () => {
+    setCartItems([]);
+  };
+
+  const increaseQuantity = (id) => {
+    setCartItems((prevItems) =>
+      prevItems.map((item) =>
+        item.id === id
+          ? { ...item, quantity: item.quantity + 1, price: item.price + (item.price / item.quantity) }
+          : item
+      )
+    );
+  };
+
+  const decreaseQuantity = (id) => {
+    setCartItems((prevItems) =>
+      prevItems.map((item) =>
+        item.id === id && item.quantity > 1
+          ? { ...item, quantity: item.quantity - 1, price: item.price - (item.price / item.quantity) }
+          : item
+      )
+    );
+  };
+
+  return { cartItems, addToCart, removeFromCart, clearCart, increaseQuantity, decreaseQuantity };
+}
+
+export default useShoppingCart;
